@@ -1,0 +1,29 @@
+{
+  "name": "@parcel/repl",
+  "version": "2.0.0-alpha.3.2",
+  "license": "MIT",
+  "private": true,
+  "alias": {
+    "fs": false
+  },
+  "scripts": {
+    "start": "node -r @parcel/babel-register index.js"
+  },
+  "engines": {
+    "node": ">=12"
+  },
+  "dependencies": {
+    "@mischnic/pako": "^1.0.10",
+    "@parcel/core": "^2.0.0-alpha.3.2",
+    "@parcel/fs": "^2.0.0-alpha.3",
+    "@parcel/package-manager": "^2.0.0-alpha.3",
+    "isomorphic-fetch": "^2.2.1",
+    "semver": "^6.3.0"
+  },
+  "default": "dist/index.js",
+  "targets": {
+    "default": {
+      "includeNodeModules": false
+    }
+  }
+}

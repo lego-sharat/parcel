@@ -83,7 +83,7 @@ export default class WorkerFarm extends EventEmitter {
       maxConcurrentCallsPerWorker: WorkerFarm.getConcurrentCallsPerWorker(),
       forcedKillTime: 500,
       warmWorkers: false,
-      useLocalWorker: true, // TODO: setting this to false makes some tests fail, figure out why
+      useLocalWorker: false, // TODO: setting this to false makes some tests fail, figure out why
       backend: detectBackend(),
       ...farmOptions,
     };
@@ -93,7 +93,9 @@ export default class WorkerFarm extends EventEmitter {
     }
 
     // $FlowFixMe this must be dynamic
-    this.localWorker = require(this.options.workerPath);
+    // if(this.options.useLocalWorker){
+    //   this.localWorker = require(this.options.workerPath);
+    // }
     this.run = this.createHandle('run');
 
     this.startMaxWorkers();
