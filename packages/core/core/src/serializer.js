@@ -1,5 +1,16 @@
 // @flow
-import v8 from 'v8';
+let _serialize, _deserialize;
+try {
+  const v8 = require('v8');
+  // $FlowFixMe - flow doesn't know about this method yet
+  _serialize = v8.serialize;
+  // $FlowFixMe - flow doesn't know about this method yet
+  _deserialize = v8.deserialize;
+} catch (_) {
+  const {parse, stringify} = require('teleport-javascript');
+  _serialize = v => Buffer.from(stringify(v));
+  _deserialize = v => parse(v.toString('utf8'));
+}
 
 const nameToCtor: Map<string, Class<*>> = new Map();
 const ctorToName: Map<Class<*>, string> = new Map();
@@ -188,7 +199,9 @@ export function restoreDeserializedObject(object: any) {
       let ctor = nameToCtor.get(value.$$type);
       if (ctor == null) {
         throw new Error(
-          `Expected constructor ${value.$$type} to be registered with serializer to deserialize`,
+          `Expected constructor ${
+            value.$$type
+          } to be registered with serializer to deserialize`,
         );
       }
 
@@ -206,12 +219,10 @@ export function restoreDeserializedObject(object: any) {
 
 export function serialize(object: any): Buffer {
   let mapped = prepareForSerialization(object);
-  // $FlowFixMe - flow doesn't know about this method yet
-  return v8.serialize(mapped);
+  return _serialize(mapped);
 }
 
 export function deserialize(buffer: Buffer): any {
-  // $FlowFixMe - flow doesn't know about this method yet
-  let obj = v8.deserialize(buffer);
+  let obj = _deserialize(buffer);
   return restoreDeserializedObject(obj);
 }

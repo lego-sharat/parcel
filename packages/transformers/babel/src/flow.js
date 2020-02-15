@@ -13,7 +13,10 @@ export default function getFlowOptions(config: Config): ?BabelConfig {
 
   return {
     plugins: [
-      ['@babel/plugin-transform-flow-strip-types', {requireDirective: true}],
+      [
+        require('@babel/plugin-transform-flow-strip-types'),
+        {requireDirective: true},
+      ],
     ],
   };
 }

@@ -4,7 +4,9 @@ import type {FilePath} from '@parcel/types';
 import path from 'path';
 
 export type * from './types';
-export {NodeFS} from './NodeFS';
+// export {NodeFS} from './NodeFS';
+class NodeFS implements FileSystem {}
+export {NodeFS};
 export {MemoryFS} from './MemoryFS';
 export {OverlayFS} from './OverlayFS';
 

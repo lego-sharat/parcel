@@ -4,10 +4,7 @@
   "license": "MIT",
   "private": true,
   "scripts": {
-    "start": "node -r @parcel/babel-register index.js"
-  },
-  "engines": {
-    "node": ">=12"
+    "build:browser": "parcel2c build . --target appBrowser --no-source-maps --no-scope-hoist"
   },
   "dependencies": {
     "@mischnic/pako": "^1.0.10",
@@ -18,13 +15,23 @@
     "semver": "^6.3.0"
   },
   "alias": {
-    "fs": false
+    "fs": "./fs.js",
+    "@parcel/watcher": false
   },
-  "source": "index.js",
-  "default": "dist/index.js",
+  "source": "index.html",
+  "appNode": "dist/node/index.js",
+  "appBrowser": "dist/browser/index.html",
   "targets": {
-    "default": {
-      "includeNodeModules": true
+    "appNode": {
+      "includeNodeModules": true,
+      "engines": {
+        "node": ">=12"
+      }
+    },
+    "appBrowser": {
+      "engines": {
+        "browsers": "Chrome 75"
+      }
     }
   }
 }

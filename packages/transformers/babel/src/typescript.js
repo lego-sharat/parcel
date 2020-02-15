@@ -8,7 +8,7 @@ export default function getTypescriptOptions(config: Config): BabelConfig {
   return {
     plugins: [
       [
-        '@babel/plugin-transform-typescript',
+        require('@babel/plugin-transform-typescript'),
         {isTSX: path.extname(config.searchPath) === '.tsx'},
       ],
     ],

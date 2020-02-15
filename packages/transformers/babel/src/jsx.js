@@ -49,7 +49,9 @@ export default async function getJSXOptions(config: Config) {
 
   if (pragma || JSX_EXTENSIONS[path.extname(config.searchPath)]) {
     return {
-      plugins: [['@babel/plugin-transform-react-jsx', {pragma, pragmaFrag}]],
+      plugins: [
+        [require('@babel/plugin-transform-react-jsx'), {pragma, pragmaFrag}],
+      ],
     };
   }
 }

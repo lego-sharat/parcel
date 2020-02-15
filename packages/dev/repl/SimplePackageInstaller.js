@@ -170,7 +170,9 @@ export default class SimplePackageInstaller implements PackageInstaller {
           await this.fs.writeFile(
             p,
             // $FlowFixMe
-            process.browser ? arrayBuffer : Buffer.from(arrayBuffer.buffer),
+            /* process.browser ? arrayBuffer :  */ Buffer.from(
+              arrayBuffer.buffer,
+            ),
           );
         }
 

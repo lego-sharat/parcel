@@ -22,7 +22,7 @@ import {
 } from '@parcel/core';
 import ThrowableDiagnostic, {anyToDiagnostic} from '@parcel/diagnostic';
 import Worker, {type WorkerCall} from './Worker';
-import cpuCount from './cpuCount';
+// import cpuCount from './cpuCount';
 import Handle from './Handle';
 import {child} from './childState';
 import {detectBackend} from './backend';
@@ -92,10 +92,9 @@ export default class WorkerFarm extends EventEmitter {
       throw new Error('Please provide a worker path!');
     }
 
-    // $FlowFixMe this must be dynamic
-    // if(this.options.useLocalWorker){
-    //   this.localWorker = require(this.options.workerPath);
-    // }
+    if (this.options.useLocalWorker) {
+      this.localWorker = require('@parcel/core/src/worker.js');
+    }
     this.run = this.createHandle('run');
 
     this.startMaxWorkers();
@@ -259,8 +258,16 @@ export default class WorkerFarm extends EventEmitter {
     if (handleId != null) {
       mod = nullthrows(this.handles.get(handleId)).fn;
     } else if (location) {
-      // $FlowFixMe this must be dynamic
-      mod = require(location);
+      if (process.browser) {
+        if (location.endsWith('@parcel/workers/src/bus.js')) {
+          mod = require('./bus.js');
+        } else {
+          throw new Error('No dynamic require possible');
+        }
+      } else {
+        // $FlowFixMe this must be dynamic
+        mod = require(location);
+      }
     } else {
       throw new Error('Unknown request');
     }
@@ -481,9 +488,10 @@ export default class WorkerFarm extends EventEmitter {
   }
 
   static getNumWorkers() {
-    return process.env.PARCEL_WORKERS
-      ? parseInt(process.env.PARCEL_WORKERS, 10)
-      : cpuCount();
+    return navigator.hardwareConcurrency / 2;
+    // return process.env.PARCEL_WORKERS
+    //   ? parseInt(process.env.PARCEL_WORKERS, 10)
+    //   : cpuCount();
   }
 
   static isWorker() {

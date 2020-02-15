@@ -65,7 +65,7 @@ export class NodePackageManager implements PackageManager {
     return this.load(resolved, from);
   }
 
-  load(resolved: FilePath, from: FilePath) {
+  load(resolved: FilePath, from: FilePath): any {
     switch (resolved) {
       case '@parcel/bundler-default':
         return require('@parcel/bundler-default');
@@ -91,10 +91,10 @@ export class NodePackageManager implements PackageManager {
         return require('@parcel/packager-ts');
       case '@parcel/reporter-bundle-analyzer':
         return require('@parcel/reporter-bundle-analyzer');
-      case '@parcel/reporter-cli':
-        return require('@parcel/reporter-cli');
-      case '@parcel/reporter-dev-server':
-        return require('@parcel/reporter-dev-server');
+      // case '@parcel/reporter-cli':
+      //   return require('@parcel/reporter-cli');
+      // case '@parcel/reporter-dev-server':
+      //   return require('@parcel/reporter-dev-server');
       case '@parcel/resolver-default':
         return require('@parcel/resolver-default');
       case '@parcel/runtime-browser-hmr':
@@ -202,7 +202,7 @@ export class NodePackageManager implements PackageManager {
       try {
         resolved = await resolve(this.fs, name, {
           basedir,
-          extensions: Object.keys(Module._extensions),
+          extensions: ['.js', '.json'], //Object.keys(Module._extensions),
         });
       } catch (e) {
         if (e.code !== 'MODULE_NOT_FOUND' || options?.autoInstall === false) {

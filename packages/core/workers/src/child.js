@@ -79,7 +79,7 @@ export class Child {
 
   childInit(module: string, childId: number): void {
     // $FlowFixMe this must be dynamic
-    this.module = require(module);
+    this.module = require('@parcel/core/src/worker.js');
     this.childId = childId;
   }
 

@@ -12,7 +12,7 @@ import micromatch from 'micromatch';
 import builtins from './builtins';
 import nullthrows from 'nullthrows';
 
-const EMPTY_SHIM = require.resolve('./_empty');
+const EMPTY_SHIM = '/_empty.js'; //require.resolve('./_empty');
 
 type InternalPackageJSON = PackageJSON & {pkgdir: string, ...};
 type Options = {|

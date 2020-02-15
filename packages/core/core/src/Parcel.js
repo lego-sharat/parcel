@@ -386,6 +386,6 @@ export {default as Asset} from './InternalAsset';
 export function createWorkerFarm(options: $Shape<FarmOptions> = {}) {
   return new WorkerFarm({
     ...options,
-    workerPath: require.resolve('./worker'),
+    workerPath: '@parcel/core/src/worker.js', //require.resolve('./worker'),
   });
 }
