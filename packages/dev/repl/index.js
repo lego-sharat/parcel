@@ -14,7 +14,7 @@ const defaultConfigContents = {
     '*.{js,mjs,jsm,jsx,es6,ts,tsx}': [
       // '@parcel/transformer-react-refresh-babel',
       // '@parcel/transformer-babel',
-      // '@parcel/transformer-js',
+      '@parcel/transformer-js',
       // '@parcel/transformer-react-refresh-wrap',
     ],
     // '*.{json,json5}': ['@parcel/transformer-json'],
@@ -76,15 +76,15 @@ const INPUT = `if (false) {
   const memFS = new MemoryFS(workerFarm);
 
   const pkgInstaller = new SimplePackageInstaller(memFS);
-  await pkgInstaller.install({
-    modules: [
-      '@parcel/bundler-default',
-      '@parcel/namer-default',
-      '@parcel/packager-js',
-      '@parcel/resolver-default',
-    ].map(name => ({name, range: 'nightly'})),
-    cwd: '/',
-  });
+  // await pkgInstaller.install({
+  //   modules: [
+  //     '@parcel/bundler-default',
+  //     '@parcel/namer-default',
+  //     '@parcel/packager-js',
+  //     '@parcel/resolver-default',
+  //   ].map(name => ({name, range: 'nightly'})),
+  //   cwd: '/',
+  // });
 
   console.log('installed');
   const b = new Parcel({

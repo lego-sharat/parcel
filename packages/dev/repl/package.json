@@ -3,9 +3,6 @@
   "version": "2.0.0-alpha.3.2",
   "license": "MIT",
   "private": true,
-  "alias": {
-    "fs": false
-  },
   "scripts": {
     "start": "node -r @parcel/babel-register index.js"
   },
@@ -20,10 +17,14 @@
     "isomorphic-fetch": "^2.2.1",
     "semver": "^6.3.0"
   },
+  "alias": {
+    "fs": false
+  },
+  "source": "index.js",
   "default": "dist/index.js",
   "targets": {
     "default": {
-      "includeNodeModules": false
+      "includeNodeModules": true
     }
   }
 }

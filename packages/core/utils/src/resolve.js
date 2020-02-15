@@ -28,6 +28,10 @@ export async function resolve(
     ...ResolveOptions,
   |},
 ): Promise<ResolveResult> {
+  if (id.startsWith('@parcel/') && id !== '@parcel/watcher') {
+    return {resolved: id, pkg: {name: id, version: 'repl'}};
+  }
+
   if (process.env.PARCEL_BUILD_ENV !== 'production') {
     // $FlowFixMe
     opts = opts || {};
