@@ -84,7 +84,7 @@ export function generateExports(
   path: any,
   replacements: Map<Symbol, Symbol>,
   options: PluginOptions,
-) {
+): Set<Symbol> {
   let exportedIdentifiers = new Map();
   let entry = bundle.getMainEntry();
   if (entry) {

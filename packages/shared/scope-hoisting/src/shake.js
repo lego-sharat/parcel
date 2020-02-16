@@ -1,11 +1,18 @@
+// @flow
+import type {Symbol} from '@parcel/types';
+
 import * as t from '@babel/types';
+import {simple as walkSimple} from 'babylon-walk';
 
 /**
  * This is a small small implementation of dead code removal specialized to handle
  * removing unused exports. All other dead code removal happens in workers on each
  * individual file by babel-minify.
  */
-export default function treeShake(scope, exportedIdentifiers) {
+export default function treeShake(
+  scope: any,
+  exportedIdentifiers: Set<Symbol>,
+) {
   // Keep passing over all bindings in the scope until we don't remove any.
   // This handles cases where we remove one binding which had a reference to
   // another one. That one will get removed in the next pass if it is now unreferenced.
@@ -14,7 +21,6 @@ export default function treeShake(scope, exportedIdentifiers) {
     removed = false;
 
     // Recrawl to get all bindings.
-    scope.crawl();
     Object.keys(scope.bindings).forEach(name => {
       let binding = getUnusedBinding(scope.path, name);
 
@@ -24,8 +30,10 @@ export default function treeShake(scope, exportedIdentifiers) {
       }
 
       // Remove the binding and all references to it.
-      binding.path.remove();
-      binding.referencePaths.concat(binding.constantViolations).forEach(remove);
+      pathRemove(binding.path);
+      binding.referencePaths
+        .concat(binding.constantViolations)
+        .forEach(p => remove(p));
 
       scope.removeBinding(name);
       removed = true;
@@ -104,6 +112,7 @@ function remove(path) {
       path.parentPath.isSequenceExpression() &&
       path.parent.expressions.length === 1
     ) {
+      // todo dead?
       // replace sequence expression with it's sole child
       path.parentPath.replaceWith(path);
       remove(path.parentPath);
@@ -112,8 +121,9 @@ function remove(path) {
       path.parentPath.isExpressionStatement() &&
       ((right = path.get('right')).isPure() || right.isIdentifier())
     ) {
-      path.remove();
+      pathRemove(path);
     } else {
+      // TODO dead?
       // right side isn't pure
       path.replaceWith(path.node.right);
     }
@@ -126,11 +136,48 @@ function remove(path) {
       path.parentPath.isSequenceExpression() &&
       path.parent.expressions.length === 1
     ) {
+      // TODO dead?
       // replace sequence expression with it's sole child
       path.parentPath.replaceWith(path);
       remove(path.parentPath);
     } else {
-      path.remove();
+      pathRemove(path);
+    }
+  }
+}
+
+const RemoveVisitor = {
+  Identifier(node, scope) {
+    dereferenceIdentifier(node, scope);
+  },
+};
+
+// like path.remove(), but updates bindings in path.scope.getProgramParent()
+function pathRemove(path) {
+  let scope = path.scope.getProgramParent();
+  walkSimple(path.node, RemoveVisitor, scope);
+  path.remove();
+}
+
+function dereferenceIdentifier(node, scope) {
+  let binding = scope.getBinding(node.name);
+  if (binding) {
+    let i = binding.referencePaths.findIndex(v => v.node === node);
+    if (i >= 0) {
+      binding.dereference();
+      binding.referencePaths.splice(i, 1);
+      return;
+    }
+
+    let j = binding.constantViolations.findIndex(v =>
+      Object.values(v.getBindingIdentifiers()).includes(node),
+    );
+    if (j >= 0) {
+      binding.constantViolations.splice(j, 1);
+      if (binding.constantViolations.length == 0) {
+        binding.constant = true;
+      }
+      return;
     }
   }
 }

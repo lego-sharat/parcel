@@ -37,5 +37,5 @@ export type OutputFormat = {|
     path: any,
     replacements: Map<Symbol, Symbol>,
     options: PluginOptions,
-  ): any,
+  ): Set<Symbol>,
 |};

@@ -573,6 +573,7 @@ export function link({
           options,
         );
 
+        path.scope.crawl();
         treeShake(path.scope, exported);
       },
     },
