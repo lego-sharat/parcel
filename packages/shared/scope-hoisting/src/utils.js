@@ -1,6 +1,7 @@
 // @flow
 import type {Asset, MutableAsset, Bundle, BundleGraph} from '@parcel/types';
 import * as t from '@babel/types';
+import {simple as walkSimple} from 'babylon-walk';
 
 export function getName(
   asset: Asset | MutableAsset,
@@ -59,4 +60,40 @@ export function isReferenced(bundle: Bundle, bundleGraph: BundleGraph) {
   ].some(
     b => b.type === 'js' && (!b.env.isIsolated() || bundle.env.isIsolated()),
   );
+}
+
+// like path.remove(), but updates bindings in path.scope.getProgramParent()
+export function pathRemove(path: any) {
+  let scope = path.scope.getProgramParent();
+  walkSimple(path.node, RemoveVisitor, scope);
+  path.remove();
+}
+
+const RemoveVisitor = {
+  Identifier(node, scope) {
+    dereferenceIdentifier(node, scope);
+  },
+};
+
+function dereferenceIdentifier(node, scope) {
+  let binding = scope.getBinding(node.name);
+  if (binding) {
+    let i = binding.referencePaths.findIndex(v => v.node === node);
+    if (i >= 0) {
+      binding.dereference();
+      binding.referencePaths.splice(i, 1);
+      return;
+    }
+
+    let j = binding.constantViolations.findIndex(v =>
+      Object.values(v.getBindingIdentifiers()).includes(node),
+    );
+    if (j >= 0) {
+      binding.constantViolations.splice(j, 1);
+      if (binding.constantViolations.length == 0) {
+        binding.constant = true;
+      }
+      return;
+    }
+  }
 }

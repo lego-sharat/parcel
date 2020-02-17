@@ -53,19 +53,19 @@ export function generateExports(
   path: any,
 ) {
   let exported = new Set<Symbol>();
-  let statements = [];
 
   for (let asset of referencedAssets) {
     let exportsId = asset.meta.exportsIdentifier;
     invariant(typeof exportsId === 'string');
     exported.add(exportsId);
 
-    statements.push(
+    let [decl] = path.pushContainer('body', [
       EXPORT_TEMPLATE({
         ASSET_ID: t.stringLiteral(asset.id),
-        IDENTIFIER: t.identifier(asset.meta.exportsIdentifier),
+        IDENTIFIER: t.identifier(exportsId),
       }),
-    );
+    ]);
+    path.scope.getBinding(exportsId)?.reference(decl.get('expression.right'));
   }
 
   let entry = bundle.getMainEntry();
@@ -77,14 +77,14 @@ export function generateExports(
     invariant(typeof exportsId === 'string');
     exported.add(exportsId);
 
-    statements.push(
+    let [decl] = path.pushContainer('body', [
       EXPORT_TEMPLATE({
         ASSET_ID: t.stringLiteral(entry.id),
-        IDENTIFIER: t.identifier(entry.meta.exportsIdentifier),
+        IDENTIFIER: t.identifier(exportsId),
       }),
-    );
+    ]);
+    path.scope.getBinding(exportsId)?.reference(decl.get('expression.right'));
   }
 
-  path.pushContainer('body', statements);
   return exported;
 }

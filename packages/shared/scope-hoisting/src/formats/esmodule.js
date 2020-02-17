@@ -151,9 +151,10 @@ export function generateExports(
       // If all exports in the binding are named exports, export the entire declaration.
       // Also rename all of the identifiers to their exported name.
       if (exportedIds.length === ids.length && !path.isImportDeclaration()) {
-        path.replaceWith(t.exportNamedDeclaration(path.node, []));
+        let [decl] = path.replaceWith(t.exportNamedDeclaration(path.node, []));
         for (let id of exportedIds) {
           let exportName = nullthrows(exportedIdentifiers.get(id));
+          path.scope.getBinding(id).reference(decl);
           rename(path.scope, id, exportName);
           exported.add(exportName);
         }
@@ -166,6 +167,7 @@ export function generateExports(
         !path.isImportDeclaration()
       ) {
         path.replaceWith(t.exportDefaultDeclaration(path.node));
+        console.log('TODO esmodule 1');
 
         // Otherwise, add export statements after for each identifier.
       } else {
@@ -177,9 +179,10 @@ export function generateExports(
               binding.constantViolations[binding.constantViolations.length - 1];
           }
 
-          insertPath.insertAfter(
+          let [decl] = insertPath.insertAfter(
             t.exportDefaultDeclaration(t.identifier(defaultExport)),
           );
+          binding.reference(decl.get('declaration'));
         }
 
         if (exportedIds.length > 0) {
@@ -196,7 +199,14 @@ export function generateExports(
             );
           }
 
-          path.insertAfter(t.exportNamedDeclaration(null, specifiers));
+          let [decl] = path.insertAfter(
+            t.exportNamedDeclaration(null, specifiers),
+          );
+          let spec = decl.get('specifiers');
+          for (let s of spec) {
+            let id = s.get('local');
+            path.scope.getBinding(id.node.name).reference(id);
+          }
         }
       }
     },

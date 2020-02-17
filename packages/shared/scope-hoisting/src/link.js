@@ -540,7 +540,6 @@ export function link({
         for (let file of importedFiles.values()) {
           if (file.bundle) {
             imports.push(
-              // $FlowFixMe
               ...format.generateBundleImports(
                 bundle,
                 file.bundle,
@@ -550,7 +549,6 @@ export function link({
             );
           } else {
             imports.push(
-              // $FlowFixMe
               ...format.generateExternalImport(bundle, file, path.scope),
             );
           }
@@ -563,7 +561,6 @@ export function link({
         }
 
         // Generate exports
-        // $FlowFixMe
         let exported = format.generateExports(
           bundleGraph,
           bundle,
@@ -573,8 +570,8 @@ export function link({
           options,
         );
 
-        path.scope.crawl();
         treeShake(path.scope, exported);
+        // path.stop(); // related to last check in ReferencedIdentifier visitor
       },
     },
   });

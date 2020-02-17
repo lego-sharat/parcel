@@ -24,6 +24,7 @@ export type OutputFormat = {|
     from: Bundle,
     bundle: Bundle,
     assets: Set<Asset>,
+    scope: any,
   ): Array<any>,
   generateExternalImport(
     bundle: Bundle,

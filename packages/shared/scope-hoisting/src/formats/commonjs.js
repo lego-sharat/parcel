@@ -241,19 +241,20 @@ export function generateExports(
   options: PluginOptions,
 ) {
   let exported = new Set<Symbol>();
-  let statements = [];
 
   for (let asset of referencedAssets) {
     let exportsId = asset.meta.exportsIdentifier;
     invariant(typeof exportsId === 'string');
     exported.add(exportsId);
 
-    statements.push(
+    let [decl] = path.pushContainer('body', [
       EXPORT_TEMPLATE({
         NAME: t.identifier(exportsId),
         IDENTIFIER: t.identifier(exportsId),
       }),
-    );
+    ]);
+    path.scope.getBinding(exportsId).reference(decl.get('expression.right'));
+    console.log('TODO commonjs 1');
   }
 
   let entry = bundle.getMainEntry();
@@ -278,11 +279,14 @@ export function generateExports(
           exported.add('exports');
         } else {
           exported.add(exportsId);
-          statements.push(
+          let [decl] = path.pushContainer('body', [
             MODULE_EXPORTS_TEMPLATE({
               IDENTIFIER: t.identifier(exportsId),
             }),
-          );
+          ]);
+          path.scope
+            .getBinding(exportsId)
+            .reference(decl.get('expression.right'));
         }
       }
     } else {
@@ -318,29 +322,29 @@ export function generateExports(
           : exportSymbol;
         rename(path.scope, symbol, id);
 
-        binding.path.getStatementParent().insertAfter(
+        let [decl] = binding.path.getStatementParent().insertAfter(
           EXPORT_TEMPLATE({
             NAME: t.identifier(exportSymbol),
             IDENTIFIER: t.identifier(id),
           }),
         );
+        path.scope.getBinding(id).reference(decl.get('expression.right'));
 
         // Exports other than the default export are live bindings. Insert an assignment
         // after each constant violation so this remains true.
         if (exportSymbol !== 'default') {
           for (let path of binding.constantViolations) {
-            path.insertAfter(
+            let [decl] = path.insertAfter(
               EXPORT_TEMPLATE({
                 NAME: t.identifier(exportSymbol),
                 IDENTIFIER: t.identifier(id),
               }),
             );
+            path.scope.getBinding(id).reference(decl.get('expression.right'));
           }
         }
       }
     }
   }
-
-  path.pushContainer('body', statements);
   return exported;
 }

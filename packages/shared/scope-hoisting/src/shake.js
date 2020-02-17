@@ -2,7 +2,7 @@
 import type {Symbol} from '@parcel/types';
 
 import * as t from '@babel/types';
-import {simple as walkSimple} from 'babylon-walk';
+import {pathRemove} from './utils';
 
 /**
  * This is a small small implementation of dead code removal specialized to handle
@@ -142,42 +142,6 @@ function remove(path) {
       remove(path.parentPath);
     } else {
       pathRemove(path);
-    }
-  }
-}
-
-const RemoveVisitor = {
-  Identifier(node, scope) {
-    dereferenceIdentifier(node, scope);
-  },
-};
-
-// like path.remove(), but updates bindings in path.scope.getProgramParent()
-function pathRemove(path) {
-  let scope = path.scope.getProgramParent();
-  walkSimple(path.node, RemoveVisitor, scope);
-  path.remove();
-}
-
-function dereferenceIdentifier(node, scope) {
-  let binding = scope.getBinding(node.name);
-  if (binding) {
-    let i = binding.referencePaths.findIndex(v => v.node === node);
-    if (i >= 0) {
-      binding.dereference();
-      binding.referencePaths.splice(i, 1);
-      return;
-    }
-
-    let j = binding.constantViolations.findIndex(v =>
-      Object.values(v.getBindingIdentifiers()).includes(node),
-    );
-    if (j >= 0) {
-      binding.constantViolations.splice(j, 1);
-      if (binding.constantViolations.length == 0) {
-        binding.constant = true;
-      }
-      return;
     }
   }
 }
